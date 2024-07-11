@@ -1,0 +1,32 @@
+{
+  "name": "mechta-market/php-sms-gateway",
+  "type": "package",
+  "description": "Обёртка PHP для работы с SMS-шлюзом",
+  "version": "1.0.0",
+  "authors": [
+    {
+      "name": "Sultan Nadirbek",
+      "email": "sultannadirbek@mechta.kz"
+    }
+  ],
+  "autoload": {
+    "psr-4": {
+      "MechtaMarket\\SmsGateway\\": "src/"
+    }
+  },
+  "autoload-dev": {
+    "psr-4": {
+      "MechtaMarket\\SmsGateway\\Tests\\": "tests/"
+    }
+  },
+  "require": {
+    "php": "^8.3",
+    "mechta-market/php-http-client": "^1.0"
+  },
+  "require-dev": {
+    "phpunit/phpunit": "^11.2"
+  },
+  "scripts": {
+    "test": "./run_tests.sh"
+  }
+}
