@@ -2,9 +2,12 @@
 
 namespace MechtaMarket\SmsGateway;
 
-use Exception;
 use MechtaMarket\HttpClient\Response;
 use MechtaMarket\SmsGateway\Contracts\SmsGatewayRepositoryInterface;
+use MechtaMarket\SmsGateway\Exceptions\{
+    SmsGatewayClientException,
+    SmsGatewayServerException
+};
 use MechtaMarket\SmsGateway\Repositories\SmsGatewayRepository;
 
 /**
@@ -32,42 +35,60 @@ class SmsGatewayService
     }
 
     /**
-     * @throws Exception
+     * @throws SmsGatewayClientException
+     * @throws SmsGatewayServerException
      */
     public function sendSync(string $phone, string $text): int
     {
         $response = $this->send($phone, $text, true);
-
-        if ($response->status() !== 200) {
-            throw new Exception('Failed to send SMS', $response->status());
-        }
+        $this->handleResponse($response);
 
         $body = $response->json();
 
         if (!isset($body['id'])) {
-            throw new Exception('Failed to send SMS');
+            throw new SmsGatewayServerException('Failed to send SMS', 'no_id');
         }
 
         return (int) $body['id'];
     }
 
     /**
-     * @throws Exception
+     * @throws SmsGatewayClientException
+     * @throws SmsGatewayServerException
      */
     public function sendAsync(string $phone, string $text): void
     {
         $response = $this->send($phone, $text, false);
-
-        if ($response->status() !== 200) {
-            throw new Exception('Failed to send SMS', $response->status());
-        }
+        $this->handleResponse($response);
     }
 
-    /**
-     * @throws Exception
-     */
     public function send(string $phone, string $text, bool $sync): Response
     {
         return $this->getSmsGatewayRepository()->send($phone, $text, $sync);
+    }
+
+    /**
+     * @throws SmsGatewayClientException
+     * @throws SmsGatewayServerException
+     */
+    private function handleResponse(Response $response): void
+    {
+        if ($response->clientError()) {
+            $body = $response->json();
+            throw new SmsGatewayClientException(
+                $body['desc'] ?? 'Client error occurred',
+                $body['error_code'] ?? 'unknown',
+                $response->status()
+            );
+        }
+
+        if ($response->serverError()) {
+            $body = $response->json();
+            throw new SmsGatewayServerException(
+                $body['desc'] ?? 'Server error occurred',
+                $body['error_code'] ?? 'unknown',
+                $response->status()
+            );
+        }
     }
 }

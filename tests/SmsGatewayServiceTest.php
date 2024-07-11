@@ -3,9 +3,12 @@
 namespace MechtaMarket\SmsGateway\Tests;
 
 use MechtaMarket\HttpClient\Response;
-use MechtaMarket\SmsGateway\Contracts\SmsGatewayRepositoryInterface;
 use MechtaMarket\SmsGateway\SmsGatewayService;
+use MechtaMarket\SmsGateway\Contracts\SmsGatewayRepositoryInterface;
+use MechtaMarket\SmsGateway\Exceptions\SmsGatewayClientException;
+use MechtaMarket\SmsGateway\Exceptions\SmsGatewayServerException;
 use PHPUnit\Framework\TestCase;
+use PHPUnit\Framework\MockObject\MockObject;
 use Exception;
 
 /**
@@ -14,10 +17,11 @@ use Exception;
  */
 class SmsGatewayServiceTest extends TestCase
 {
-    private SmsGatewayRepositoryInterface $sms_gateway_repository_mock;
+    private MockObject $sms_gateway_repository_mock;
     private SmsGatewayService $sms_gateway_service;
 
     /**
+     * @throws Exception
      * @throws \PHPUnit\Framework\MockObject\Exception
      */
     protected function setUp(): void
@@ -28,8 +32,9 @@ class SmsGatewayServiceTest extends TestCase
     }
 
     /**
+     * @throws SmsGatewayServerException
+     * @throws SmsGatewayClientException
      * @throws \PHPUnit\Framework\MockObject\Exception
-     * @throws Exception
      */
     public function testSendSyncSuccess(): void
     {
@@ -46,50 +51,53 @@ class SmsGatewayServiceTest extends TestCase
     }
 
     /**
+     * @throws SmsGatewayServerException
      * @throws \PHPUnit\Framework\MockObject\Exception
      */
-    public function testSendSyncFailureStatus400(): void
+    public function testSendSyncFailureClientError(): void
     {
         $response_mock = $this->createMock(Response::class);
         $response_mock->method('status')->willReturn(400);
         $response_mock->method('json')->willReturn([
-            'desc' => 'Bad Request',
-            'error_code' => '400'
+            'desc' => 'Bad Request'
         ]);
+        $response_mock->method('clientError')->willReturn(true);
 
         $this->sms_gateway_repository_mock->method('send')
             ->with('1234567890', 'Test message', true)
             ->willReturn($response_mock);
 
-        $this->expectException(Exception::class);
-        $this->expectExceptionMessage('Failed to send SMS');
+        $this->expectException(SmsGatewayClientException::class);
+        $this->expectExceptionMessage('Bad Request');
         $this->sms_gateway_service->sendSync('1234567890', 'Test message');
     }
 
     /**
      * @throws \PHPUnit\Framework\MockObject\Exception
+     * @throws SmsGatewayClientException
      */
-    public function testSendSyncFailureStatus500(): void
+    public function testSendSyncFailureServerError(): void
     {
         $response_mock = $this->createMock(Response::class);
         $response_mock->method('status')->willReturn(500);
         $response_mock->method('json')->willReturn([
-            'desc' => 'Internal Server Error',
-            'error_code' => '500'
+            'desc' => 'Internal Server Error'
         ]);
+        $response_mock->method('serverError')->willReturn(true);
 
         $this->sms_gateway_repository_mock->method('send')
             ->with('1234567890', 'Test message', true)
             ->willReturn($response_mock);
 
-        $this->expectException(Exception::class);
-        $this->expectExceptionMessage('Failed to send SMS');
+        $this->expectException(SmsGatewayServerException::class);
+        $this->expectExceptionMessage('Internal Server Error');
         $this->sms_gateway_service->sendSync('1234567890', 'Test message');
     }
 
     /**
+     * @throws SmsGatewayServerException
+     * @throws SmsGatewayClientException
      * @throws \PHPUnit\Framework\MockObject\Exception
-     * @throws Exception
      */
     public function testSendAsyncSuccess(): void
     {
@@ -105,44 +113,46 @@ class SmsGatewayServiceTest extends TestCase
     }
 
     /**
+     * @throws SmsGatewayServerException
      * @throws \PHPUnit\Framework\MockObject\Exception
      */
-    public function testSendAsyncFailureStatus400(): void
+    public function testSendAsyncFailureClientError(): void
     {
         $response_mock = $this->createMock(Response::class);
         $response_mock->method('status')->willReturn(400);
         $response_mock->method('json')->willReturn([
-            'desc' => 'Bad Request',
-            'error_code' => '400'
+            'desc' => 'Bad Request'
         ]);
+        $response_mock->method('clientError')->willReturn(true);
 
         $this->sms_gateway_repository_mock->method('send')
             ->with('1234567890', 'Test message', false)
             ->willReturn($response_mock);
 
-        $this->expectException(Exception::class);
-        $this->expectExceptionMessage('Failed to send SMS');
+        $this->expectException(SmsGatewayClientException::class);
+        $this->expectExceptionMessage('Bad Request');
         $this->sms_gateway_service->sendAsync('1234567890', 'Test message');
     }
 
     /**
+     * @throws SmsGatewayClientException
      * @throws \PHPUnit\Framework\MockObject\Exception
      */
-    public function testSendAsyncFailureStatus500(): void
+    public function testSendAsyncFailureServerError(): void
     {
         $response_mock = $this->createMock(Response::class);
         $response_mock->method('status')->willReturn(500);
         $response_mock->method('json')->willReturn([
-            'desc' => 'Internal Server Error',
-            'error_code' => '500'
+            'desc' => 'Internal Server Error'
         ]);
+        $response_mock->method('serverError')->willReturn(true);
 
         $this->sms_gateway_repository_mock->method('send')
             ->with('1234567890', 'Test message', false)
             ->willReturn($response_mock);
 
-        $this->expectException(Exception::class);
-        $this->expectExceptionMessage('Failed to send SMS');
+        $this->expectException(SmsGatewayServerException::class);
+        $this->expectExceptionMessage('Internal Server Error');
         $this->sms_gateway_service->sendAsync('1234567890', 'Test message');
     }
 }

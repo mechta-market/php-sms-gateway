@@ -7,16 +7,10 @@ MechtaMarket SMS Gateway — это пакет для отправки SMS со�
 
 ## Установка
 
-1. Установите пакет с помощью Composer:
+Установите пакет с помощью Composer:
 
 ```bash
 composer require mechta-market/php-sms-gateway
-```
-
-2. Настройте переменные окружения:
-
-```dotenv
-SMS_GATEWAY_BASE_URL=https://sms-gateway.example.com
 ```
 
 ## Использование
@@ -28,7 +22,8 @@ SMS_GATEWAY_BASE_URL=https://sms-gateway.example.com
 ```php
 use MechtaMarket\SmsGateway\SmsGatewayService;
 
-$smsGatewayService = new SmsGatewayService(env('SMS_GATEWAY_BASE_URL'));
+$base_url = 'https://sms-gateway.example.com';
+$sms_gateway_service = new SmsGatewayService($base_url);
 ```
 
 ## Отправка SMS
