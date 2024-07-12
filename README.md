@@ -38,7 +38,14 @@ $sms_gateway_service = new SmsGatewayService($base_url);
 try {
     $sms_id = $sms_gateway_service->sendSync('1234567890', 'Тестовое сообщение');
     echo "SMS успешно отправлено с ID: $sms_id";
-} catch (\Exception $e) {
+} catch (InvalidArgumentException $e) {
+    // некорректные аргументы
+    echo "Не удалось отправить SMS: " . $e->getMessage();
+} catch (\MechtaMarket\SmsGateway\Exceptions\SmsGatewayClientException $e) {
+    // клиентская ошибка
+    echo "Не удалось отправить SMS: " . $e->getMessage();
+} catch (\MechtaMarket\SmsGateway\Exceptions\SmsGatewayServerException $e) {
+    // ошибка сервера
     echo "Не удалось отправить SMS: " . $e->getMessage();
 }
 ```
@@ -51,7 +58,14 @@ try {
 try {
     $sms_gateway_service->sendAsync('1234567890', 'Тестовое сообщение');
     echo "SMS успешно отправлено";
-} catch (\Exception $e) {
+} catch (InvalidArgumentException $e) {
+    // некорректные аргументы
+    echo "Не удалось отправить SMS: " . $e->getMessage();
+} catch (\MechtaMarket\SmsGateway\Exceptions\SmsGatewayClientException $e) {
+    // клиентская ошибка
+    echo "Не удалось отправить SMS: " . $e->getMessage();
+} catch (\MechtaMarket\SmsGateway\Exceptions\SmsGatewayServerException $e) {
+    // ошибка сервера
     echo "Не удалось отправить SMS: " . $e->getMessage();
 }
 ```
