@@ -11,11 +11,7 @@ use MechtaMarket\SmsGateway\Exceptions\{
     SmsGatewayClientException,
     SmsGatewayServerException
 };
-use PHPUnit\Framework\{
-    TestCase,
-    MockObject\MockObject
-};
-use Exception;
+use PHPUnit\Framework\{MockObject\Exception, TestCase, MockObject\MockObject};
 
 /**
  * Class SmsGatewayServiceTest
@@ -27,17 +23,18 @@ class SmsGatewayServiceTest extends TestCase
     private SmsGatewayService $sms_gateway_service;
 
     /**
-     * @throws \PHPUnit\Framework\MockObject\Exception
+     * @throws Exception
      */
     protected function setUp(): void
     {
         $this->http_client_mock = $this->createMock(HttpClient::class);
-        $this->sms_gateway_service = new SmsGatewayService(client: $this->http_client_mock);
+        $this->sms_gateway_service = new SmsGatewayService();
+        $this->sms_gateway_service->setClient($this->http_client_mock);
     }
 
     /**
      * @throws SmsGatewayServerException
-     * @throws \PHPUnit\Framework\MockObject\Exception
+     * @throws Exception
      * @throws SmsGatewayClientException
      */
     public function testSendSyncSuccess(): void
@@ -64,7 +61,7 @@ class SmsGatewayServiceTest extends TestCase
 
     /**
      * @throws SmsGatewayServerException
-     * @throws \PHPUnit\Framework\MockObject\Exception
+     * @throws Exception
      */
     public function testSendSyncFailureClientError(): void
     {
@@ -92,7 +89,7 @@ class SmsGatewayServiceTest extends TestCase
 
     /**
      * @throws SmsGatewayClientException
-     * @throws \PHPUnit\Framework\MockObject\Exception
+     * @throws Exception
      */
     public function testSendSyncFailureServerError(): void
     {
@@ -121,7 +118,7 @@ class SmsGatewayServiceTest extends TestCase
     /**
      * @throws SmsGatewayServerException
      * @throws SmsGatewayClientException
-     * @throws \PHPUnit\Framework\MockObject\Exception
+     * @throws Exception
      */
     public function testSendAsyncSuccess(): void
     {
@@ -146,7 +143,7 @@ class SmsGatewayServiceTest extends TestCase
 
     /**
      * @throws SmsGatewayServerException
-     * @throws \PHPUnit\Framework\MockObject\Exception
+     * @throws Exception
      */
     public function testSendAsyncFailureClientError(): void
     {
@@ -173,7 +170,7 @@ class SmsGatewayServiceTest extends TestCase
     }
 
     /**
-     * @throws \PHPUnit\Framework\MockObject\Exception
+     * @throws Exception
      * @throws SmsGatewayClientException
      */
     public function testSendAsyncFailureServerError(): void

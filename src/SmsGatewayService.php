@@ -18,11 +18,10 @@ class SmsGatewayService
     private HttpClient $client;
 
     public function __construct(
-        string $base_url = '',
-        HttpClient $client = null
+        string $base_url = ''
     )
     {
-        $this->initClient($base_url, $client);
+        $this->initClient($base_url);
     }
 
     /**
@@ -87,14 +86,9 @@ class SmsGatewayService
         }
     }
 
-    private function initClient($base_url, HttpClient $client = null): void
+    private function initClient($base_url): void
     {
-        if ($client) {
-            $this->setClient($client);
-        } else {
-            $this->setClient(new HttpClient());
-        }
-
+        $this->setClient(new HttpClient());
         $this->getClient()->baseUrl($base_url);
     }
 
