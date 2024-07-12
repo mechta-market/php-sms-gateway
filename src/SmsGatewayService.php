@@ -77,10 +77,8 @@ class SmsGatewayService
         }
 
         if ($response->serverError()) {
-            $body = $response->json();
             throw new SmsGatewayServerException(
-                $body['desc'] ?? 'Server error occurred',
-                $body['error_code'] ?? 'unknown',
+                'Failed to send SMS: ' . $response->body(),
                 $response->status()
             );
         }

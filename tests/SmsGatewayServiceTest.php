@@ -95,9 +95,7 @@ class SmsGatewayServiceTest extends TestCase
     {
         $response_mock = $this->createMock(Response::class);
         $response_mock->method('status')->willReturn(500);
-        $response_mock->method('json')->willReturn([
-            'desc' => 'Internal Server Error'
-        ]);
+        $response_mock->method('body')->willReturn('Internal Server Error');
         $response_mock->method('clientError')->willReturn(false);
         $response_mock->method('serverError')->willReturn(true);
         $response_mock->method('successful')->willReturn(false);
@@ -177,9 +175,7 @@ class SmsGatewayServiceTest extends TestCase
     {
         $response_mock = $this->createMock(Response::class);
         $response_mock->method('status')->willReturn(500);
-        $response_mock->method('json')->willReturn([
-            'desc' => 'Internal Server Error'
-        ]);
+        $response_mock->method('body')->willReturn('Internal Server Error');
         $response_mock->method('clientError')->willReturn(false);
         $response_mock->method('serverError')->willReturn(true);
         $response_mock->method('successful')->willReturn(false);
