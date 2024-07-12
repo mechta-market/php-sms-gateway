@@ -1,23 +1,17 @@
 <?php
 
-namespace MechtaMarket\SmsGateway\Tests;
+namespace MechtaMarket\SmsGateway\Tests\SmsGatewayService;
 
-use MechtaMarket\HttpClient\{
-    HttpClient,
-    Response
-};
+use MechtaMarket\HttpClient\{HttpClient, Response};
+use MechtaMarket\SmsGateway\Exceptions\{SmsGatewayClientException, SmsGatewayServerException};
 use MechtaMarket\SmsGateway\SmsGatewayService;
-use MechtaMarket\SmsGateway\Exceptions\{
-    SmsGatewayClientException,
-    SmsGatewayServerException
-};
-use PHPUnit\Framework\{MockObject\Exception, TestCase, MockObject\MockObject};
+use PHPUnit\Framework\{MockObject\Exception, MockObject\MockObject, TestCase};
 
 /**
  * Class SmsGatewayServiceTest
  * @package MechtaMarket\SmsGateway\Tests
  */
-class SmsGatewayServiceTest extends TestCase
+class SmsGatewayServiceResponsesTest extends TestCase
 {
     private MockObject $http_client_mock;
     private SmsGatewayService $sms_gateway_service;

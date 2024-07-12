@@ -2,6 +2,7 @@
 
 namespace MechtaMarket\SmsGateway;
 
+use InvalidArgumentException;
 use MechtaMarket\HttpClient\HttpClient;
 use MechtaMarket\HttpClient\Response;
 use MechtaMarket\SmsGateway\Exceptions\{
@@ -24,12 +25,25 @@ class SmsGatewayService
         $this->initClient($base_url);
     }
 
+    public function setClient(HttpClient $client): void
+    {
+        $this->client = $client;
+    }
+
+    public function getClient(): HttpClient
+    {
+        return $this->client;
+    }
+
     /**
      * @throws SmsGatewayClientException
      * @throws SmsGatewayServerException
      */
     public function sendSync(string $phone, string $text): int
     {
+        $phone = $this->checkPhoneAndFormatNumber($phone);
+        $this->checkText($text);
+
         $response = $this->send($phone, $text, true);
         $this->handleResponse($response);
 
@@ -48,6 +62,9 @@ class SmsGatewayService
      */
     public function sendAsync(string $phone, string $text): void
     {
+        $phone = $this->checkPhoneAndFormatNumber($phone);
+        $this->checkText($text);
+
         $response = $this->send($phone, $text, false);
         $this->handleResponse($response);
     }
@@ -77,10 +94,38 @@ class SmsGatewayService
         }
 
         if ($response->serverError()) {
+            if ($response->body()) {
+                throw new SmsGatewayServerException(
+                    'Failed to send SMS with response: ' . $response->body(),
+                    $response->status()
+                );
+            }
             throw new SmsGatewayServerException(
-                'Failed to send SMS: ' . $response->body(),
+                'Failed to send SMS with empty response',
                 $response->status()
             );
+        }
+    }
+
+    private function checkPhoneAndFormatNumber(string $phone): string
+    {
+        if (empty($phone)) {
+            throw new InvalidArgumentException('Phone number cannot be empty');
+        }
+
+        $phone = preg_replace('/[^0-9]/', '', $phone);
+
+        if (strlen($phone) < 10) {
+            throw new InvalidArgumentException('Phone number is too short');
+        }
+
+        return substr(trim($phone), -10);
+    }
+
+    private function checkText(string $text): void
+    {
+        if (empty($text) || empty(trim($text))) {
+            throw new InvalidArgumentException('Text cannot be empty');
         }
     }
 
@@ -88,15 +133,5 @@ class SmsGatewayService
     {
         $this->setClient(new HttpClient());
         $this->getClient()->baseUrl($base_url);
-    }
-
-    public function setClient(HttpClient $client): void
-    {
-        $this->client = $client;
-    }
-
-    public function getClient(): HttpClient
-    {
-        return $this->client;
     }
 }
