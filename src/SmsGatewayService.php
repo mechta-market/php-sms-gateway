@@ -2,13 +2,12 @@
 
 namespace MechtaMarket\SmsGateway;
 
+use MechtaMarket\HttpClient\HttpClient;
 use MechtaMarket\HttpClient\Response;
-use MechtaMarket\SmsGateway\Contracts\SmsGatewayRepositoryInterface;
 use MechtaMarket\SmsGateway\Exceptions\{
     SmsGatewayClientException,
     SmsGatewayServerException
 };
-use MechtaMarket\SmsGateway\Repositories\SmsGatewayRepository;
 
 /**
  * Class SmsGatewayService
@@ -16,22 +15,14 @@ use MechtaMarket\SmsGateway\Repositories\SmsGatewayRepository;
  */
 class SmsGatewayService
 {
-    private SmsGatewayRepositoryInterface $sms_gateway_repository;
+    private HttpClient $client;
 
-    public function __construct(string $base_url = '')
+    public function __construct(
+        string $base_url = '',
+        HttpClient $client = null
+    )
     {
-        $sms_gateway_repository = new SmsGatewayRepository($base_url);
-        $this->setSmsGatewayRepository($sms_gateway_repository);
-    }
-
-    public function setSmsGatewayRepository(SmsGatewayRepositoryInterface $sms_gateway_repository): void
-    {
-        $this->sms_gateway_repository = $sms_gateway_repository;
-    }
-
-    public function getSmsGatewayRepository(): SmsGatewayRepositoryInterface
-    {
-        return $this->sms_gateway_repository;
+        $this->initClient($base_url, $client);
     }
 
     /**
@@ -62,9 +53,13 @@ class SmsGatewayService
         $this->handleResponse($response);
     }
 
-    public function send(string $phone, string $text, bool $sync): Response
+    private function send(string $phone, string $text, bool $sync): Response
     {
-        return $this->getSmsGatewayRepository()->send($phone, $text, $sync);
+        return $this->getClient()->asJson()->post('send', [
+            'phone' => $phone,
+            'text' => $text,
+            'sync' => $sync
+        ]);
     }
 
     /**
@@ -90,5 +85,26 @@ class SmsGatewayService
                 $response->status()
             );
         }
+    }
+
+    private function initClient($base_url, HttpClient $client = null): void
+    {
+        if ($client) {
+            $this->setClient($client);
+        } else {
+            $this->setClient(new HttpClient());
+        }
+
+        $this->getClient()->baseUrl($base_url);
+    }
+
+    public function setClient(HttpClient $client): void
+    {
+        $this->client = $client;
+    }
+
+    public function getClient(): HttpClient
+    {
+        return $this->client;
     }
 }

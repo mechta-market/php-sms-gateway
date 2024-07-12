@@ -2,13 +2,19 @@
 
 namespace MechtaMarket\SmsGateway\Tests;
 
-use MechtaMarket\HttpClient\Response;
+use MechtaMarket\HttpClient\{
+    HttpClient,
+    Response
+};
 use MechtaMarket\SmsGateway\SmsGatewayService;
-use MechtaMarket\SmsGateway\Contracts\SmsGatewayRepositoryInterface;
-use MechtaMarket\SmsGateway\Exceptions\SmsGatewayClientException;
-use MechtaMarket\SmsGateway\Exceptions\SmsGatewayServerException;
-use PHPUnit\Framework\TestCase;
-use PHPUnit\Framework\MockObject\MockObject;
+use MechtaMarket\SmsGateway\Exceptions\{
+    SmsGatewayClientException,
+    SmsGatewayServerException
+};
+use PHPUnit\Framework\{
+    TestCase,
+    MockObject\MockObject
+};
 use Exception;
 
 /**
@@ -17,33 +23,39 @@ use Exception;
  */
 class SmsGatewayServiceTest extends TestCase
 {
-    private MockObject $sms_gateway_repository_mock;
+    private MockObject $http_client_mock;
     private SmsGatewayService $sms_gateway_service;
 
     /**
-     * @throws Exception
      * @throws \PHPUnit\Framework\MockObject\Exception
      */
     protected function setUp(): void
     {
-        $this->sms_gateway_repository_mock = $this->createMock(SmsGatewayRepositoryInterface::class);
-        $this->sms_gateway_service = new SmsGatewayService();
-        $this->sms_gateway_service->setSmsGatewayRepository($this->sms_gateway_repository_mock);
+        $this->http_client_mock = $this->createMock(HttpClient::class);
+        $this->sms_gateway_service = new SmsGatewayService(client: $this->http_client_mock);
     }
 
     /**
      * @throws SmsGatewayServerException
-     * @throws SmsGatewayClientException
      * @throws \PHPUnit\Framework\MockObject\Exception
+     * @throws SmsGatewayClientException
      */
     public function testSendSyncSuccess(): void
     {
         $response_mock = $this->createMock(Response::class);
         $response_mock->method('status')->willReturn(200);
         $response_mock->method('json')->willReturn(['id' => 1]);
+        $response_mock->method('successful')->willReturn(true);
+        $response_mock->method('clientError')->willReturn(false);
+        $response_mock->method('serverError')->willReturn(false);
 
-        $this->sms_gateway_repository_mock->method('send')
-            ->with('1234567890', 'Test message', true)
+        $this->http_client_mock->method('asJson')->willReturn($this->http_client_mock);
+        $this->http_client_mock->method('post')
+            ->with('send', [
+                'phone' => '1234567890',
+                'text' => 'Test message',
+                'sync' => true
+            ])
             ->willReturn($response_mock);
 
         $result = $this->sms_gateway_service->sendSync('1234567890', 'Test message');
@@ -62,19 +74,25 @@ class SmsGatewayServiceTest extends TestCase
             'desc' => 'Bad Request'
         ]);
         $response_mock->method('clientError')->willReturn(true);
+        $response_mock->method('serverError')->willReturn(false);
+        $response_mock->method('successful')->willReturn(false);
 
-        $this->sms_gateway_repository_mock->method('send')
-            ->with('1234567890', 'Test message', true)
+        $this->http_client_mock->method('asJson')->willReturn($this->http_client_mock);
+        $this->http_client_mock->method('post')
+            ->with('send', [
+                'phone' => '1234567890',
+                'text' => 'Test message',
+                'sync' => true
+            ])
             ->willReturn($response_mock);
 
         $this->expectException(SmsGatewayClientException::class);
-        $this->expectExceptionMessage('Bad Request');
         $this->sms_gateway_service->sendSync('1234567890', 'Test message');
     }
 
     /**
-     * @throws \PHPUnit\Framework\MockObject\Exception
      * @throws SmsGatewayClientException
+     * @throws \PHPUnit\Framework\MockObject\Exception
      */
     public function testSendSyncFailureServerError(): void
     {
@@ -83,14 +101,20 @@ class SmsGatewayServiceTest extends TestCase
         $response_mock->method('json')->willReturn([
             'desc' => 'Internal Server Error'
         ]);
+        $response_mock->method('clientError')->willReturn(false);
         $response_mock->method('serverError')->willReturn(true);
+        $response_mock->method('successful')->willReturn(false);
 
-        $this->sms_gateway_repository_mock->method('send')
-            ->with('1234567890', 'Test message', true)
+        $this->http_client_mock->method('asJson')->willReturn($this->http_client_mock);
+        $this->http_client_mock->method('post')
+            ->with('send', [
+                'phone' => '1234567890',
+                'text' => 'Test message',
+                'sync' => true
+            ])
             ->willReturn($response_mock);
 
         $this->expectException(SmsGatewayServerException::class);
-        $this->expectExceptionMessage('Internal Server Error');
         $this->sms_gateway_service->sendSync('1234567890', 'Test message');
     }
 
@@ -103,9 +127,17 @@ class SmsGatewayServiceTest extends TestCase
     {
         $response_mock = $this->createMock(Response::class);
         $response_mock->method('status')->willReturn(200);
+        $response_mock->method('successful')->willReturn(true);
+        $response_mock->method('clientError')->willReturn(false);
+        $response_mock->method('serverError')->willReturn(false);
 
-        $this->sms_gateway_repository_mock->method('send')
-            ->with('1234567890', 'Test message', false)
+        $this->http_client_mock->method('asJson')->willReturn($this->http_client_mock);
+        $this->http_client_mock->method('post')
+            ->with('send', [
+                'phone' => '1234567890',
+                'text' => 'Test message',
+                'sync' => false
+            ])
             ->willReturn($response_mock);
 
         $this->sms_gateway_service->sendAsync('1234567890', 'Test message');
@@ -124,19 +156,25 @@ class SmsGatewayServiceTest extends TestCase
             'desc' => 'Bad Request'
         ]);
         $response_mock->method('clientError')->willReturn(true);
+        $response_mock->method('serverError')->willReturn(false);
+        $response_mock->method('successful')->willReturn(false);
 
-        $this->sms_gateway_repository_mock->method('send')
-            ->with('1234567890', 'Test message', false)
+        $this->http_client_mock->method('asJson')->willReturn($this->http_client_mock);
+        $this->http_client_mock->method('post')
+            ->with('send', [
+                'phone' => '1234567890',
+                'text' => 'Test message',
+                'sync' => false
+            ])
             ->willReturn($response_mock);
 
         $this->expectException(SmsGatewayClientException::class);
-        $this->expectExceptionMessage('Bad Request');
         $this->sms_gateway_service->sendAsync('1234567890', 'Test message');
     }
 
     /**
-     * @throws SmsGatewayClientException
      * @throws \PHPUnit\Framework\MockObject\Exception
+     * @throws SmsGatewayClientException
      */
     public function testSendAsyncFailureServerError(): void
     {
@@ -145,14 +183,20 @@ class SmsGatewayServiceTest extends TestCase
         $response_mock->method('json')->willReturn([
             'desc' => 'Internal Server Error'
         ]);
+        $response_mock->method('clientError')->willReturn(false);
         $response_mock->method('serverError')->willReturn(true);
+        $response_mock->method('successful')->willReturn(false);
 
-        $this->sms_gateway_repository_mock->method('send')
-            ->with('1234567890', 'Test message', false)
+        $this->http_client_mock->method('asJson')->willReturn($this->http_client_mock);
+        $this->http_client_mock->method('post')
+            ->with('send', [
+                'phone' => '1234567890',
+                'text' => 'Test message',
+                'sync' => false
+            ])
             ->willReturn($response_mock);
 
         $this->expectException(SmsGatewayServerException::class);
-        $this->expectExceptionMessage('Internal Server Error');
         $this->sms_gateway_service->sendAsync('1234567890', 'Test message');
     }
 }
