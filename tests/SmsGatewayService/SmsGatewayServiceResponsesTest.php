@@ -43,7 +43,7 @@ class SmsGatewayServiceResponsesTest extends TestCase
         $this->http_client_mock->method('asJson')->willReturn($this->http_client_mock);
         $this->http_client_mock->method('post')
             ->with('send', [
-                'phone' => '1234567890',
+                'to' => '1234567890',
                 'text' => 'Test message',
                 'sync' => true
             ])
@@ -71,7 +71,7 @@ class SmsGatewayServiceResponsesTest extends TestCase
         $this->http_client_mock->method('asJson')->willReturn($this->http_client_mock);
         $this->http_client_mock->method('post')
             ->with('send', [
-                'phone' => '1234567890',
+                'to' => '1234567890',
                 'text' => 'Test message',
                 'sync' => true
             ])
@@ -97,7 +97,7 @@ class SmsGatewayServiceResponsesTest extends TestCase
         $this->http_client_mock->method('asJson')->willReturn($this->http_client_mock);
         $this->http_client_mock->method('post')
             ->with('send', [
-                'phone' => '1234567890',
+                'to' => '1234567890',
                 'text' => 'Test message',
                 'sync' => true
             ])
@@ -123,7 +123,7 @@ class SmsGatewayServiceResponsesTest extends TestCase
         $this->http_client_mock->method('asJson')->willReturn($this->http_client_mock);
         $this->http_client_mock->method('post')
             ->with('send', [
-                'phone' => '1234567890',
+                'to' => '1234567890',
                 'text' => 'Test message',
                 'sync' => false
             ])
@@ -151,7 +151,7 @@ class SmsGatewayServiceResponsesTest extends TestCase
         $this->http_client_mock->method('asJson')->willReturn($this->http_client_mock);
         $this->http_client_mock->method('post')
             ->with('send', [
-                'phone' => '1234567890',
+                'to' => '1234567890',
                 'text' => 'Test message',
                 'sync' => false
             ])
@@ -177,7 +177,7 @@ class SmsGatewayServiceResponsesTest extends TestCase
         $this->http_client_mock->method('asJson')->willReturn($this->http_client_mock);
         $this->http_client_mock->method('post')
             ->with('send', [
-                'phone' => '1234567890',
+                'to' => '1234567890',
                 'text' => 'Test message',
                 'sync' => false
             ])
