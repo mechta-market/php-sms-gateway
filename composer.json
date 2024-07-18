@@ -2,7 +2,7 @@
   "name": "mechta-market/php-sms-gateway",
   "type": "package",
   "description": "Обёртка PHP для работы с SMS-шлюзом",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "authors": [
     {
       "name": "Sultan Nadirbek",
