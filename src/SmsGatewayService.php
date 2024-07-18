@@ -72,7 +72,7 @@ class SmsGatewayService
     private function send(string $phone, string $text, bool $sync): Response
     {
         return $this->getClient()->asJson()->post('send', [
-            'phone' => $phone,
+            'to' => $phone,
             'text' => $text,
             'sync' => $sync
         ]);
